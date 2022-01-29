@@ -1,0 +1,19 @@
+builder begin_message(flags, addr, grams) inline_ref {
+  var msg = begin_cell()
+    .store_uint(flags, 6)
+    .store_slice(addr)
+    .store_grams(grams)
+    .store_uint(0, 1 + 4 + 4 + 64 + 32 + 1 + 1);
+  return msg;
+}
+
+builder begin_log_msg() inline {
+  var msg = begin_cell()
+    .store_uint(0x30, 6) ;; ext_out_msg_info$11 addr_none$00 addr_none$00
+    .store_uint(0, 32 + 64 + 2);
+  return msg;
+}
+
+builder store_comment(builder b, slice text) inline {
+  return b.store_uint(0, 32).store_slice(text);
+}

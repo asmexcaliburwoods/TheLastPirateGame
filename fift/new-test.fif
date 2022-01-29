@@ -1,0 +1,14 @@
+"TonUtil.fif" include
+"Asm.fif" include
+
+<b "kQCx7imOA8QyndoDZcuGgmyEgPunWdO8WJ3kGziSgZ3Q3nht"
+   parse-smc-addr drop Addr, b> <s constant game
+
+."Creating test" cr
+"../data/test" =: file-base
+0 =: wc
+<{ SETCP0 ACCEPT
+   "../func/auto/test-code.fif" include PUSHREF SETCODE
+}>c =: code
+<b b> =: storage
+"create-contract.fif" include

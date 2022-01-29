@@ -1,0 +1,29 @@
+"TonUtil.fif" include
+"Asm.fif" include
+
+{ parse-smc-addr drop
+  <b -rot Addr, b> <s constant } : set-owner
+"setup.fif" include
+
+."Creating distributor" cr
+"../data/distributor" =: file-base
+0 =: wc
+<{ SETCP0 ACCEPT
+   "../func/auto/distributor-code.fif" include PUSHREF SETCODE
+}>c =: code
+<b b> =: storage
+"create-contract.fif" include
+<b contract_addr Addr, b> <s constant owner cr
+
+."Creating game" cr
+"../data/game" =: file-base
+0 =: wc
+<{ SETCP0 ACCEPT
+   "../func/auto/game-code.fif" include PUSHREF SETCODE
+}>c =: code
+<b 0xffffffff 32 u,
+   jackpot Gram,
+   owner s,
+   0 40 u,
+b> =: storage
+"create-contract.fif" include

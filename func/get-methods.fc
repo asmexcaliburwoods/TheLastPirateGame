@@ -1,0 +1,23 @@
+int get_jackpot() method_id {
+  var (_, jackpot, _, _) = load_data();
+  return jackpot;
+}
+
+int get_game_end() method_id {
+  var (ends_at, _, _, _) = load_data();
+  return ends_at;
+}
+
+int get_seqno() method_id {
+  var (_, _, _, seqno) = load_data();
+  return seqno;
+}
+
+(int, int) get_last_player() method_id {
+  var (_, _, last_player, _) = load_data();
+  return parse_std_addr(last_player);
+}
+
+(int, int) get_owner() method_id {
+  return parse_std_addr(settings::owner());
+}

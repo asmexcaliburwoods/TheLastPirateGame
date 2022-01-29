@@ -1,0 +1,104 @@
+() recv_internal(int my_balance, int msg_value, cell in_msg_cell, slice in_msg) impure {
+  var cs = in_msg_cell.begin_parse();
+  var flags = cs~load_uint(4);
+
+  if (flags & 1) {
+    ;; ignore bounced messages
+    return ();
+  }
+
+  var sender = cs~load_msg_addr();
+  (int wc, _) = parse_std_addr(sender);
+  throw_if(31, wc); ;; we don't want waste too much on fwd_fee, ensure wc = 0
+
+  var (ends_at, jackpot, last_player, seqno) = load_data();
+  if (ends_at < now()) {
+    ;; we have a WINNER
+    var msg = begin_message(0x10, last_player, jackpot).store_comment(text::winner());
+    send_raw_message(msg.end_cell(), 0);
+
+    var log = begin_log_msg()
+      .store_uint(2, 8) ;; tag
+      .store_uint(jackpot, 64);
+    send_raw_message(log.end_cell(), 0);
+
+    ;; return msg_value
+    var msg = begin_message(0x10, sender, 0);
+    send_raw_message(msg.end_cell(), 64 + 2);
+
+    ;; withdraw the rest
+    var msg = begin_message(0x10, settings::owner(), 0);
+    send_raw_message(msg.end_cell(), 128 + 2);
+
+    ;; restart the game
+    return save_data(0xffffffff, 0, sender, 0);
+  }
+
+  int bet = msg_value;
+  throw_if(30, bet < settings::min_bet());
+
+  int fee = muldiv(bet, settings::owner_fee(), 100);
+  int rest = bet - fee;
+  jackpot += rest;
+  last_player = sender;
+  seqno += 1;
+
+  (int utime_since, int utime_until) = current_round();
+  int time = now();
+  int delay = settings::delay();
+  if (time > utime_until - delay * 2) | (time < utime_since + settings::big_delay()) {
+    delay = settings::big_delay();
+  }
+  ends_at = time + delay;
+
+  ;; testnet only (delete me)
+  ;; throw_if(1000, utime_until - utime_since > 10000);
+
+  int reward = 0;
+  ifnot (seqno % 10) {
+    reward = settings::start_reward();
+    ;; unroll loop (lower gas fees)
+    ifnot (seqno % 100) { reward *= 10;
+    ifnot (seqno % 1000) { reward *= 10;
+    ifnot (seqno % 10000) { reward *= 10;
+    ifnot (seqno % 100000) { reward *= 10;
+    ifnot (seqno % 1000000) { reward *= 10;
+    ifnot (seqno % 10000000) { reward *= 10;
+    } } } } } }
+  }
+
+  if (reward > 0) {
+    jackpot -= reward;
+
+    ;; send reward
+    slice txt = (reward > msg_value ? text::reward() : text::payback());
+    ifnot (seqno % 1000000) {
+      txt = text::big_reward();
+    }
+    var msg = begin_message(0x10, sender, reward).store_comment(txt);
+    send_raw_message(msg.end_cell(), 1);
+  }
+
+  var log = begin_log_msg()
+    .store_uint(1, 8) ;; tag
+    .store_uint(jackpot, 64)
+    .store_uint(seqno, 40)
+    .store_uint(reward, 64)
+    .store_uint(ends_at, 32);
+  send_raw_message(log.end_cell(), 0);
+
+  if (my_balance - reward - jackpot > settings::withdraw_at()) {
+    ;; auto-withdraw owner balance
+    ;; reserve some grams for gas fees
+    raw_reserve(jackpot + (1 << 30), 0);
+    var msg = begin_message(0x10, settings::owner(), 0).store_comment(text::withdrawal());
+    send_raw_message(msg.end_cell(), 128);
+  }
+
+  save_data(ends_at, jackpot, last_player, seqno);
+
+  ;; we suppose that fee (0.2 ton) is always enough for paying blockchain fees
+  ;; we could check the config, but it seems to be overcomplication
+  ;; we ensure that sender wc is 0 to limit fwd_fee
+  ;; the max amount of gas used is a constant
+}

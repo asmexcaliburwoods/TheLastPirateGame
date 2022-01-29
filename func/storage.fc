@@ -1,0 +1,26 @@
+{- storage#_ ends_at:uint32
+             jackpot:Grams
+             last_player:MsgAddrInt
+             seqno:uint40
+           = Storage;
+-}
+
+_ load_data() impure inline_ref {
+  var ds = get_data().begin_parse();
+  return (
+    ds~load_uint(32),
+    ds~load_grams(),
+    ds~load_msg_addr(),
+    ds~load_uint(40)
+  );
+}
+
+
+() save_data(ends_at, jackpot, player, seqno) impure inline_ref {
+  set_data(begin_cell()
+    .store_uint(ends_at, 32)
+    .store_grams(jackpot)
+    .store_slice(player)
+    .store_uint(seqno, 40)
+  .end_cell());
+}

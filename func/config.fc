@@ -1,0 +1,9 @@
+;; utime_since, utime_until
+(int, int) current_round() inline_ref {
+  var cs = config_param(34).begin_parse();
+  int tag = cs~load_uint(8);
+  if (tag != 0x11) & (tag != 0x12) {
+    return (0, (1 << 32) - 1);
+  }
+  return (cs~load_uint(32), cs~load_uint(32));
+}

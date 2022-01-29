@@ -1,0 +1,5 @@
+slice text::winner() asm "<b 124 word 🎉 CONGRATULATIONS, YOU WON THE GAME 🎉| $, b> <s PUSHSLICE";
+slice text::payback() asm "<b 124 word keep it| $, b> <s PUSHSLICE";
+slice text::reward() asm "<b 124 word lucky one! 🥳| $, b> <s PUSHSLICE";
+slice text::big_reward() asm "<b 124 word 🎉 you're a whale now! 🤩🤑| $, b> <s PUSHSLICE";
+slice text::withdrawal() asm "<b 124 word 20% fee withdrawal| $, b> <s PUSHSLICE";

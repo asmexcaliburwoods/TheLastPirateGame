@@ -1,0 +1,7 @@
+int settings::owner_fee() asm "20 PUSHINT"; ;; 20%
+int settings::delay() asm "60 PUSHINT"; ;; 1 minute
+int settings::big_delay() asm "60 60 * PUSHINT"; ;; 60 minutes
+int settings::min_bet() asm "1.0 Gram*/ PUSHINT";
+int settings::withdraw_at() asm "100 Gram* PUSHINT";
+int settings::start_reward() asm "1.0 Gram*/ PUSHINT";
+slice settings::owner() asm "owner PUSHSLICE";
