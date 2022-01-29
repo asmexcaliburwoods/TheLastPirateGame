@@ -1,8 +1,0 @@
-slice game_addr() asm "game PUSHSLICE";
-
-() recv_internal() {
-  var msg = begin_message(0x18, game_addr(), 1000 * 1000 * 1000).end_cell();
-  repeat(100) {
-    send_raw_message(msg, 1);
-  }
-}
