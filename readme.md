@@ -1,0 +1,4 @@
+# The Last Pirate Game smart-contract
+The contract recieves bets from players. 80% of a bet adds to jackpot and 20% is game creators fee. If a bet is last for more than `settings::delay()`, the player receives the whole jackpot on the next request to the contract. During the validator switch (after elections) the delay is increased to `settings::big_delay()` due to the block production lag. The contract auto-withdraws owner fee as soon as it is at least `settings::withdraw_at()` tons. After the game end, any new bet automatically starts a new game.
+
+Also if the sequential number of the bet is multiple of `10^n`, `0 < n < 8`, the player receives a mini-reward of `10^{n - 1}` tons from the jackpot. In this way, slightly less than `70%` of the bet is amortizely reserved for rewards and only `10%` truly goes to the jackpot. However, the game may end before the round number of bets and then more than `10%` of the total bets amount is paid to the winner.
